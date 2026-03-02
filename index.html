@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Super Sensi</title>
+
+  <!-- Fontes + Ícones -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Vue 3 -->
+  <script src="https://unpkg.com/vue@3.5.2/dist/vue.global.js"></script>
+
+  <style>
+    :root {
+      /* dimensões */
+      --card-w: 440px;
+      --card-h: 640px;
+      /* Home */
+      --tools-w: 760px;
+      --tools-h: 560px;
+      /* Painel */
+
+      /* cores base */
+      --bg-a: #0b0d0f;
+      --card: #0f1114;
+      --chip: #111820;
+      --brand-red: #E53935;
+      /* vermelho oficial */
+      --menu: var(--brand-red);
+
+      /* anel */
+      --ring1: #0bbf5e;
+      --ring2: #1ee476;
+      /* ON */
+      --off1: #7f1d1d;
+      --off2: var(--brand-red);
+      /* OFF */
+
+      /* controles */
+      --track: #2a313b;
+      --track2: #1f242b;
+      --thumb: var(--brand-red);
+    }
+
+    html,
+    body {
+      height: 100%;
+      font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(60vw 60vw at 50% 20%, rgba(0, 0, 0, .35), transparent 60%),
+        radial-gradient(50vw 50vw at 0% 100%, rgba(200, 0, 0, .08), transparent 60%),
+        radial-gradient(50vw 50vw at 100% 100%, rgba(0, 120, 255, .08), transparent 60%),
+        var(--bg-a);
+      color: #fff;
+    }
+
+    /* ---------- HOME CARD ---------- */
+    .panel-card {
+      width: var(--card-w);
+      height: var(--card-h);
+      max-width: 95vw;
+      border-radius: 18px;
+      background: var(--card);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .03);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .fab {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--menu);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 8px 20px rgba(229, 57, 53, .35);
+      transition: .2s
+    }
+
+    .fab:hover {
+      filter: brightness(1.05)
+    }
+
+    .ring-wrap {
+      width: 236px;
+      height: 236px;
+      border-radius: 999px;
+      position: relative
+    }
+
+    .ring {
+      position: absolute;
+      inset: -2px;
+      border-radius: inherit;
+      background: conic-gradient(var(--ring1), var(--ring2), var(--ring1));
+      -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 14px), #000 calc(100% - 14px));
+      mask: radial-gradient(farthest-side, #0000 calc(100% - 14px), #000 calc(100% - 14px));
+      animation: spin 8s linear infinite;
+      opacity: .85;
+      transition: .25s
+    }
+
+    .ring.off {
+      background: conic-gradient(var(--off1), var(--off2), var(--off1))
+    }
+
+    .ring.checking {
+      background: conic-gradient(#2b3544, #2b3544)
+    }
+
+    .ring-pulse {
+      position: absolute;
+      inset: -8px;
+      border-radius: 999px;
+      border: 2px solid rgba(255, 255, 255, .35);
+      animation: pulse 1.2s ease-out infinite;
+      pointer-events: none
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(1turn)
+      }
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(.88);
+        opacity: .7
+      }
+
+      100% {
+        transform: scale(1.08);
+        opacity: 0
+      }
+    }
+
+    .status-chip {
+      background: #111820;
+      border-radius: 12px;
+      padding: 12px 14px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+
+    /* Switch iOS fino */
+    .switch {
+      appearance: none;
+      width: 44px;
+      height: 24px;
+      border-radius: 999px;
+      background: #2a313b;
+      position: relative;
+      transition: .2s;
+      outline: none;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08)
+    }
+
+    .switch:checked {
+      background: #10b981
+    }
+
+    .switch::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #fff;
+      transition: .2s;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .35)
+    }
+
+    .switch:checked::after {
+      left: 23px
+    }
+
+    .switch:disabled {
+      opacity: .45;
+      filter: grayscale(.25);
+      cursor: not-allowed
+    }
+
+    /* Dropdown topo */
+    .dropdown {
+      background: rgba(17, 17, 17, .96);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, .06);
+      border-radius: 12px;
+      padding: 10px;
+      width: 220px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, .45)
+    }
+
+    .dropdown a {
+      display: block;
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: #e5e7eb
+    }
+
+    .dropdown a:hover {
+      background: rgba(255, 255, 255, .06);
+      color: #fff
+    }
+
+    /* ---------- TOOLS CARD ---------- */
+    .tools-card {
+      width: var(--tools-w);
+      height: var(--tools-h);
+      max-width: 96vw;
+      border-radius: 18px;
+      background: #121416;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .03);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 78px 1fr;
+    }
+
+    .sidebar {
+      background: #0e0f11;
+      border-right: 1px solid rgba(255, 255, 255, .06);
+      padding: 14px 10px;
+      display: grid;
+      grid-auto-rows: 42px;
+      gap: 10px;
+      align-content: start
+    }
+
+    .side-btn {
+      height: 42px;
+      border-radius: 12px;
+      background: #171a1f;
+      display: grid;
+      place-items: center;
+      color: #cfd6e1;
+      transition: .2s;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .04)
+    }
+
+    .side-btn.active {
+      background: var(--brand-red);
+      color: #fff;
+      box-shadow: 0 10px 26px rgba(229, 57, 53, .35)
+    }
+
+    .side-btn:hover {
+      filter: brightness(1.05)
+    }
+
+    .tools-content {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column
+    }
+
+    /* Cabeçalho pílula */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--brand-red);
+      color: #fff;
+      padding: 7px 12px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 12px;
+      box-shadow: 0 8px 20px rgba(229, 57, 53, .30);
+      letter-spacing: .02em
+    }
+
+    /* Linha compacta */
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(180deg, #14181d 0%, #12161a 100%);
+      border: 1px solid rgba(255, 255, 255, .06);
+      padding: 10px 10px;
+      border-radius: 14px;
+      margin-top: 10px
+    }
+
+    .label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      line-height: 1.1
+    }
+
+    .muted {
+      color: #9aa3af;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 4px
+    }
+
+    .right {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .info-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: #1a2027;
+      color: #c7d0de;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08)
+    }
+
+    .info-btn:hover {
+      background: #232b34
+    }
+
+    .back-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: #171a1f;
+      display: grid;
+      place-items: center;
+      color: #d6dde8;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .04)
+    }
+
+    .back-btn:hover {
+      filter: brightness(1.05)
+    }
+
+    /* Sliders */
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%
+    }
+
+    .slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--track) 0%, var(--track2) 100%);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .05);
+      outline: none;
+      transition: background .2s;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: var(--thumb);
+      border: 2px solid var(--brand-red);
+      box-shadow: 0 2px 8px rgba(229, 57, 53, .45);
+      cursor: pointer;
+      margin-top: -3px;
+    }
+
+    .slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: var(--thumb);
+      border: none;
+      cursor: pointer;
+    }
+
+    .slider-value {
+      width: 34px;
+      text-align: right;
+      font-weight: 800;
+      font-size: 12px;
+      color: var(--brand-red)
+    }
+
+    /* Ping badge + Toast */
+    .badge-ping {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #0f3b22;
+      color: #22e38e;
+      font-weight: 800;
+      font-size: 11px;
+      letter-spacing: .02em;
+    }
+
+    .toast {
+      position: fixed;
+      top: 84px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1b2128;
+      color: #e5e7eb;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, .45);
+      z-index: 90;
+    }
+
+    .toast.tr {
+      right: 16px;
+      left: auto;
+      transform: none;
+    }
+
+    .toast .strong {
+      color: #fff;
+      font-weight: 800;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .60);
+      backdrop-filter: blur(2px);
+      display: grid;
+      place-items: center;
+      z-index: 80;
+    }
+
+    .modal-card {
+      width: 560px;
+      max-width: 92vw;
+      background: #15181d;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, .55);
+    }
+
+    .modal-title {
+      font-weight: 800;
+      color: #e5e7eb;
+    }
+
+    .modal-title .accent {
+      color: var(--brand-red);
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .btn-primary {
+      margin-top: 14px;
+      width: 100%;
+      height: 42px;
+      border-radius: 10px;
+      background: var(--brand-red);
+      color: #fff;
+      font-weight: 900;
+      letter-spacing: .02em;
+      box-shadow: 0 10px 26px rgba(229, 57, 53, .35);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.05)
+    }
+
+    /* Overlay IA */
+    .ia-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .70);
+      backdrop-filter: blur(2px);
+      display: grid;
+      place-items: center;
+      z-index: 85;
+    }
+
+    .brain {
+      width: 92px;
+      height: 92px;
+      border-radius: 999px;
+      background: #1b2128;
+      border: 2px solid rgba(255, 255, 255, .06);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, .45)
+    }
+
+    .brain i {
+      font-size: 44px;
+      color: var(--brand-red);
+    }
+
+    @media (max-width: 500px) {
+      :root {
+        --tools-w: 420px;
+        --tools-h: 610px;
+      }
+
+      .tools-content {
+        padding: 12px 12px
+      }
+
+      .row {
+        margin-top: 8px;
+        padding: 10px 10px
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app" class="min-h-screen grid place-items-center p-4">
+    <!-- ====== HOME ====== -->
+    <template v-if="view==='home'">
+      <div class="panel-card px-7 py-6 md:px-8 md:py-7">
+        <div class="flex items-center justify-between">
+          <img src="images/Design sem nome (67).png" alt="Logo"
+            class="h-9 w-auto object-contain select-none pointer-events-none" />
+          <div class="relative">
+            <button class="fab" @click="menuOpen = !menuOpen">
+              <i class="fa-solid fa-ellipsis-vertical text-white"></i>
+            </button>
+            <div v-if="menuOpen" class="dropdown absolute right-0 mt-2 z-20">
+              <a @click="openInstallHelp"><i class="fa-solid fa-up-right-and-down-left-from-center mr-2"></i>Tela Cheia
+                (Instalar App)</a>
+              <a @click="openHowTo"><i class="fa-regular fa-circle-question mr-2"></i>Como Usar?</a>
+              <a href="https://www.instagram.com/supersensioficial" target="_blank" rel="noopener noreferrer"
+                @click="menuOpen=false">
+                <i class="fa-brands fa-instagram mr-2"></i>
+                Instagram
+              </a>
+
+              <a href="https://supersensi.shop/area/" target="_self" @click="menuOpen=false">
+                <i class="fa-solid fa-right-from-bracket mr-2"></i>
+                Sair (Logout)
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Círculo -->
+        <div class="mt-7 flex justify-center">
+          <div class="ring-wrap cursor-pointer" @click="handleCenterClick">
+            <div :class="['ring', status==='off' ? 'off' : '', status==='checking' ? 'checking' : '']"></div>
+            <div v-if="status==='checking'" class="ring-pulse"></div>
+            <div class="absolute inset-0 grid place-items-center text-center select-none">
+              <div>
+                <div class="font-extrabold"
+                  :class="status==='checking' ? 'text-2xl text-sky-300' : status==='on' ? 'text-5xl text-emerald-400' : 'text-5xl text-red-400'">
+                  {{ centerTitle }}
+                </div>
+                <div class="text-sm mt-1 text-gray-400">{{ centerSubtitle }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Chips -->
+        <div class="grid grid-cols-3 gap-2 sm:gap-3 mt-7">
+          <div class="status-chip text-center !px-1">
+            <div class="text-[9px] sm:text-[10px] text-gray-400">Status</div>
+            <div class="mt-1 text-[10px] sm:text-xs"
+              :class="status==='on' ? 'text-emerald-400' : status==='off' ? 'text-red-400' : 'text-sky-300'">{{
+              statusLabel }}</div>
+          </div>
+          <div class="status-chip text-center !px-1">
+            <div class="text-[9px] sm:text-[10px] text-gray-400">Ping</div>
+            <div class="mt-1 text-[10px] sm:text-xs text-emerald-400">{{ pingText }}</div>
+          </div>
+          <div class="status-chip text-center !px-1">
+            <div class="text-[9px] sm:text-[10px] text-gray-400">Performance</div>
+            <div class="mt-1 text-[10px] sm:text-xs" :class="status==='on' ? 'text-emerald-300' : 'text-white'">{{
+              perfText }}</div>
+          </div>
+        </div>
+
+        <!-- Rodapé -->
+        <div class="absolute left-0 right-0 bottom-0 px-6 pb-6">
+          <div class="mt-8 flex items-center justify-between">
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-xl bg-red-600 grid place-items-center shadow-lg shadow-red-900/40">
+                <span class="text-sm font-bold">✔</span>
+              </div>
+              <div>
+                <div class="text-sm font-semibold leading-tight">Abrir Painel de Funções</div>
+                <div class="text-xs text-gray-400 -mt-0.5">Acesse todas as otimizações</div>
+              </div>
+            </div>
+            <button class="switch cursor-pointer" @click="openTools"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modais do menu (instalação / como usar) -->
+      <div v-if="showInstallHelp" class="modal-backdrop" @click.self="showInstallHelp=false">
+        <div class="modal-card">
+          <div class="modal-title text-[18px] mb-2">Instalar no iPhone/iPad</div>
+          <div class="text-[13px] leading-relaxed text-gray-300 space-y-3">
+            <div><span class="font-extrabold text-white">Passo 1:</span> Toque no ícone de compartilhamento (um quadrado
+              com uma seta para cima) na barra inferior do Safari.</div>
+            <div><span class="font-extrabold text-white">Passo 2:</span> Role para baixo e selecione a opção <span
+                class="italic">'Adicionar à Tela de Início'</span>.</div>
+            <div><span class="font-extrabold text-white">Passo 3:</span> Confirme o nome e toque em <span
+                class="italic">'Adicionar'</span>. O painel aparecerá como um app na sua tela de início!</div>
+          </div>
+          <button class="btn-primary" @click="showInstallHelp=false">ENTENDI!</button>
+        </div>
+      </div>
+
+      <div v-if="showHowTo" class="modal-backdrop" @click.self="showHowTo=false">
+        <div class="modal-card">
+          <div class="modal-title text-[18px] mb-2">Bem-vindo a Super Sensi!</div>
+          <div class="text-[13px] leading-relaxed text-gray-300 space-y-3">
+            <div><span class="font-extrabold text-white">Passo 1: Ative o Sistema</span><br />Toque no botão "OFF" no
+              painel principal para iniciar a otimização.</div>
+            <div><span class="font-extrabold text-white">Passo 2: Configure as Funções</span><br />Use o switch para
+              abrir o painel de funções e ativar as otimizações que desejar.</div>
+            <div><span class="font-extrabold text-white">Passo 3: Inicie o Jogo</span><br />Com o painel ativo, abra o
+              Free Fire. As otimizações serão injetadas automaticamente.</div>
+          </div>
+          <button class="btn-primary" @click="showHowTo=false">ENTENDI!</button>
+        </div>
+      </div>
+    </template>
+
+    <!-- ====== TOOLS ====== -->
+    <template v-else>
+      <div class="tools-card">
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <button class="side-btn" :class="{active: activeTab==='aim'}" @click="activeTab='aim'"><i
+              class="fa-solid fa-gear"></i></button>
+          <button class="side-btn" :class="{active: activeTab==='sens'}" @click="activeTab='sens'"><i
+              class="fa-solid fa-sliders"></i></button>
+          <button class="side-btn" :class="{active: activeTab==='opt'}" @click="activeTab='opt'"><i
+              class="fa-solid fa-bolt"></i></button>
+          <button class="side-btn" :class="{active: activeTab==='extra'}" @click="activeTab='extra'"><i
+              class="fa-regular fa-star"></i></button>
+          <button class="side-btn" :class="{active: activeTab==='ia'}" @click="activeTab='ia'"><i
+              class="fa-solid fa-brain"></i></button>
+
+          <div class="mt-auto"></div>
+          <button class="back-btn" @click="view='home'"><i class="fa-solid fa-arrow-left"></i></button>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="tools-content">
+          <!-- Cabeçalhos -->
+          <div v-if="activeTab==='aim'">
+            <span class="pill"><i class="fa-solid fa-gear"></i> Aprimoramento de Mira</span>
+          </div>
+          <div v-else-if="activeTab==='sens'">
+            <span class="pill"><i class="fa-solid fa-sliders"></i> Ajuste de Sensibilidade</span>
+          </div>
+          <div v-else-if="activeTab==='opt'">
+            <span class="pill"><i class="fa-solid fa-bolt"></i> Otimização do Dispositivo</span>
+            <div v-if="status!=='on'" class="text-[11px] text-red-300/90 mt-2">
+              Ative o sistema (<span class="font-bold">ON</span>) para usar estas opções.
+            </div>
+          </div>
+          <div v-else-if="activeTab==='extra'">
+            <span class="pill"><i class="fa-regular fa-star"></i> Funções Especiais</span>
+            <div v-if="status!=='on'" class="text-[11px] text-red-300/90 mt-2">
+              Ative o sistema (<span class="font-bold">ON</span>) para usar estas opções.
+            </div>
+          </div>
+          <div v-else>
+            <span class="pill"><i class="fa-solid fa-brain"></i> Análise por IA</span>
+            <div class="text-[12px] text-gray-300 mt-2">Nossa IA irá analisar seu estilo de jogo e modelo de celular
+              para gerar a melhor configuração.</div>
+          </div>
+
+          <!-- ===== Aba 1: Mira ===== -->
+          <template v-if="activeTab==='aim'">
+            <div class="row">
+              <div class="label">Mira Gruda</div>
+              <div class="right">
+                <button class="info-btn" @click.stop="openInfo('miraGruda')"><i
+                    class="fa-regular fa-circle-question"></i></button>
+                <input type="checkbox" class="switch" v-model="tools.miraGruda">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Mira Travada <span class="font-semibold">(Lock)</span></div>
+              <div class="right">
+                <button class="info-btn" @click.stop="openInfo('miraTravada')"><i
+                    class="fa-regular fa-circle-question"></i></button>
+                <input type="checkbox" class="switch" v-model="tools.miraTravada">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Anti-Pinada <span class="muted">(Estável)</span></div>
+              <div class="right">
+                <button class="info-btn" @click.stop="openInfo('antiPinada')"><i
+                    class="fa-regular fa-circle-question"></i></button>
+                <input type="checkbox" class="switch" v-model="tools.antiPinada">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Aim FOV <span class="muted">(90º)</span></div>
+              <div class="right">
+                <button class="info-btn" @click.stop="openInfo('aimFov')"><i
+                    class="fa-regular fa-circle-question"></i></button>
+                <input type="checkbox" class="switch" v-model="tools.aimFov">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Puxada Automática</div>
+              <div class="right">
+                <button class="info-btn" @click.stop="openInfo('puxadaAuto')"><i
+                    class="fa-regular fa-circle-question"></i></button>
+                <input type="checkbox" class="switch" v-model="tools.puxadaAuto">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Só Capa / Anti-Peito</div>
+              <div class="right">
+                <button class="info-btn" @click.stop="openInfo('soCapa')"><i
+                    class="fa-regular fa-circle-question"></i></button>
+                <input type="checkbox" class="switch" v-model="tools.soCapa">
+              </div>
+            </div>
+
+            <div class="mt-auto"></div>
+          </template>
+
+          <!-- ===== Aba 2: Sensibilidade ===== -->
+          <template v-else-if="activeTab==='sens'">
+            <div class="row">
+              <div class="label">Geral</div>
+              <div class="slider-wrap">
+                <input class="slider" type="range" min="0" max="120" v-model.number="sens.geral">
+                <div class="slider-value">{{ sens.geral }}</div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Ponto Vermelho <span class="muted">(Red Dot)</span></div>
+              <div class="slider-wrap">
+                <input class="slider" type="range" min="0" max="120" v-model.number="sens.redDot">
+                <div class="slider-value">{{ sens.redDot }}</div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Mira 2x</div>
+              <div class="slider-wrap">
+                <input class="slider" type="range" min="0" max="120" v-model.number="sens.scope2">
+                <div class="slider-value">{{ sens.scope2 }}</div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Mira 4x</div>
+              <div class="slider-wrap">
+                <input class="slider" type="range" min="0" max="120" v-model.number="sens.scope4">
+                <div class="slider-value">{{ sens.scope4 }}</div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Velocidade do Toque</div>
+              <div class="slider-wrap">
+                <input class="slider" type="range" min="0" max="120" v-model.number="sens.touch">
+                <div class="slider-value">{{ sens.touch }}</div>
+              </div>
+            </div>
+
+            <div class="mt-auto"></div>
+          </template>
+
+          <!-- ===== Aba 3: Otimização ===== -->
+          <template v-else-if="activeTab==='opt'">
+            <div class="row">
+              <div class="label">Otimizar Ping</div>
+              <div class="right">
+                <button class="info-btn" @click.stop="openInfo('otimizarPing')"><i
+                    class="fa-regular fa-circle-question"></i></button>
+                <span class="badge-ping">
+                  <i class="fa-solid fa-circle text-[6px]"></i>
+                  {{ status==='on' ? (ping!==null ? ping+'ms' : '23ms') : '-- ms' }}
+                </span>
+                <input type="checkbox" class="switch" v-model="opt.otimizarPing" :disabled="optDisabled">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Limpar Cache</div>
+              <div class="right">
+                <button class="info-btn" @click.stop="openInfo('limparCache')"><i
+                    class="fa-regular fa-circle-question"></i></button>
+                <input type="checkbox" class="switch" :checked="opt.limparCache" :disabled="optDisabled"
+                  @change="toggleCache($event)">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">FPS no Talo</div>
+              <div class="right">
+                <button class="info-btn" @click.stop="openInfo('fps')"><i
+                    class="fa-regular fa-circle-question"></i></button>
+                <input type="checkbox" class="switch" v-model="opt.fps" :disabled="optDisabled">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Modo Performance</div>
+              <div class="right">
+                <button class="info-btn" @click.stop="openInfo('perf')"><i
+                    class="fa-regular fa-circle-question"></i></button>
+                <input type="checkbox" class="switch" v-model="opt.perf" :disabled="optDisabled">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Anti-Aquecimento</div>
+              <div class="right">
+                <button class="info-btn" @click.stop="openInfo('antiHeat')"><i
+                    class="fa-regular fa-circle-question"></i></button>
+                <input type="checkbox" class="switch" v-model="opt.antiHeat" :disabled="optDisabled">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Economia de Bateria</div>
+              <div class="right">
+                <button class="info-btn" @click.stop="openInfo('battery')"><i
+                    class="fa-regular fa-circle-question"></i></button>
+                <input type="checkbox" class="switch" v-model="opt.battery" :disabled="optDisabled">
+              </div>
+            </div>
+
+            <div v-if="toast.show" class="toast" :class="{'tr': toast.pos==='tr'}"><span class="strong">{{ toast.text
+                }}</span></div>
+            <div class="mt-auto"></div>
+          </template>
+
+          <!-- ===== Aba 4: Funções Especiais ===== -->
+          <template v-else-if="activeTab==='extra'">
+            <div class="row">
+              <div class="label">Sem Recuo <span class="muted">(No Recoil)</span></div>
+              <div class="right">
+                <input type="checkbox" class="switch" v-model="extra.noRecoil" :disabled="extraDisabled">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Toque Suave <span class="muted">(Smooth Touch)</span></div>
+              <div class="right">
+                <input type="checkbox" class="switch" v-model="extra.smoothTouch" :disabled="extraDisabled">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Boost IA</div>
+              <div class="right">
+                <input type="checkbox" class="switch" v-model="extra.boostIA" :disabled="extraDisabled">
+              </div>
+            </div>
+
+            <div class="mt-auto"></div>
+          </template>
+
+          <!-- ===== Aba 5: IA ===== -->
+          <template v-else>
+            <div class="row">
+              <div class="label">Modelo do Celular</div>
+              <div class="w-[60%]">
+                <input v-model="ia.phoneModel"
+                  class="w-full bg-[#14181d] border border-white/10 rounded-lg px-3 py-2 text-[13px] outline-none"
+                  placeholder="Autodetectado" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Seu Estilo de Jogo</div>
+              <div class="w-[60%]">
+                <input v-model="ia.playStyle"
+                  class="w-full bg-[#14181d] border border-white/10 rounded-lg px-3 py-2 text-[13px] outline-none"
+                  placeholder="Agressivo (Rusher)" />
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <button class="w-56 h-11 rounded-xl font-extrabold tracking-wide transition"
+                :class="status==='on' ? 'bg-[var(--brand-red)] text-white shadow-[0_10px_26px_rgba(229,57,53,.35)]' : 'bg-[#2a313b] text-gray-300 cursor-not-allowed'"
+                :disabled="status!=='on'" @click="runIA">
+                Gerar Configuração
+              </button>
+            </div>
+
+            <div class="mt-auto"></div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Modal (info) -->
+      <div v-if="activeInfo" class="modal-backdrop" @click.self="activeInfo=null">
+        <div class="modal-card">
+          <div class="modal-title text-[15px]">
+            <span class="accent">Função:</span> {{ infos[activeInfo].title }}
+          </div>
+          <p class="text-[13px] text-gray-300 mt-3 leading-relaxed" style="text-wrap:balance;">
+            {{ infos[activeInfo].text }}
+          </p>
+          <button class="btn-primary" @click="activeInfo=null">FECHAR</button>
+        </div>
+      </div>
+
+      <!-- Overlay IA -->
+      <div v-if="iaOverlay" class="ia-overlay">
+        <div class="grid place-items-center gap-4 text-center">
+          <div class="brain"><i class="fa-solid fa-brain"></i></div>
+          <div class="text-2xl font-extrabold">Analisando...</div>
+          <div class="text-[13px] text-gray-300">{{ iaStepText }}</div>
+        </div>
+      </div>
+
+      <!-- Toast global (fallback) -->
+      <div v-if="toast.show" class="toast" :class="{'tr': toast.pos==='tr'}"><span class="strong">{{ toast.text
+          }}</span></div>
+    </template>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          view: 'home',
+          activeTab: 'opt',
+          status: 'off',
+          ping: null,
+          menuOpen: false,
+
+          // timers
+          _pingTimer: null,
+          _stepTimer1: null,
+          _stepTimer2: null,
+          _toastTimer: null,
+
+          // controle da etapa de verificação do PING (0: "-- ms", 1: "Otimizando...")
+          checkingStep: 0,
+
+          showInstallHelp: false,
+          showHowTo: false,
+
+          // Aba 1
+          tools: { miraGruda: false, miraTravada: false, antiPinada: false, aimFov: false, puxadaAuto: false, soCapa: false },
+
+          // Aba 2
+          sens: { geral: 95, redDot: 90, scope2: 100, scope4: 100, touch: 85 },
+
+          // Aba 3
+          opt: { otimizarPing: false, limparCache: false, fps: false, perf: false, antiHeat: false, battery: false },
+
+          // Aba 4
+          extra: { noRecoil: false, smoothTouch: false, boostIA: false },
+
+          // Aba 5 (IA)
+          ia: { phoneModel: 'Autodetectado', playStyle: 'Agressivo (Rusher)' },
+          iaOverlay: false,
+          iaStepText: 'Cruzando dados com pro-players...',
+
+          // Modal do “i”
+          activeInfo: null,
+          infos: {
+            miraGruda: { title: 'Aimbot de Correção V2', text: 'Este módulo analisa a zona morta do seu touchscreen e ajusta a taxa de resposta do toque. Ao ser ativado, aplica micro-correções na trajetória da mira, aumentando a aderência ao alvo em movimento e diminuindo a dispersão de balas em até 35%.' },
+            miraTravada: { title: 'Trava de Mira Magnético', text: 'Ativa um campo de assistência magnética sutil ao redor do alvo quando a mira está próxima, garantindo que disparos rápidos permaneçam focados no inimigo. Ideal para combates de curta distância.' },
+            antiPinada: { title: 'Estabilizador de Disparo', text: 'Reduz a trepidação vertical da mira durante disparos contínuos (pinadas). O sistema compensa o recuo da arma, mantendo a mira mais estável e precisa.' },
+            aimFov: { title: 'Campo de Visão Assistido (FOV)', text: 'Expande a área de detecção do aim assist em 90 graus na horizontal, facilitando a aquisição de alvos que entram rapidamente no seu campo de visão.' },
+            puxadaAuto: { title: 'Assistência de Puxada Rápida', text: 'Aplica uma força inicial na mira em direção à cabeça do oponente assim que o botão de atirar é pressionado, otimizando a chance de “capa” no primeiro disparo.' },
+            soCapa: { title: 'Prioridade de Headshot', text: 'Configura o aim assist para priorizar a cabeça como ponto focal, ignorando o peito do oponente. Aumenta significativamente a porcentagem de headshots em trocas diretas.' },
+
+            otimizarPing: { title: 'Otimizador de Rota de Rede', text: 'Redireciona sua conexão através de rotas de baixa latência, diminuindo o tempo de resposta (ping) com o servidor do jogo e reduzindo o “delay” em suas ações.' },
+            limparCache: { title: 'Limpeza de Cache Profunda', text: 'Realiza uma limpeza de arquivos temporários e desnecessários do jogo e do sistema, liberando memória RAM e melhorando os tempos de carregamento.' },
+            fps: { title: 'Desbloqueio de FPS', text: 'Remove as limitações de taxa de quadros impostas pelo sistema, permitindo que o jogo rode na máxima performance que seu dispositivo pode oferecer, resultando em uma jogabilidade mais fluida.' },
+            perf: { title: 'Modo de Alta Performance', text: 'Força o processador e a placa de vídeo do seu dispositivo a operarem em capacidade máxima, priorizando o desempenho do jogo sobre outras tarefas em segundo plano.' },
+            antiHeat: { title: 'Controle Térmico', text: 'Gerencia a temperatura do seu dispositivo de forma inteligente, prevenindo o superaquecimento que causa quedas de FPS e “travamentos” durante longas sessões de jogo.' },
+            battery: { title: 'Gerenciador de Bateria Gamer', text: 'Otimiza o consumo de energia sem sacrificar a performance, permitindo que você jogue por mais tempo antes de precisar recarregar o dispositivo.' },
+          },
+
+          toast: { show: false, text: '', pos: 'center' },
+        }
+      },
+      computed: {
+        centerTitle() { return this.status === 'off' ? 'OFF' : this.status === 'checking' ? 'VERIFICANDO' : 'ON' },
+        centerSubtitle() { return this.status === 'off' ? 'Sistema Desativado' : this.status === 'checking' ? 'Analisando sistema...' : 'Sistema Ativo e Protegido' },
+        statusLabel() { return this.status === 'off' ? 'INATIVO' : this.status === 'checking' ? 'VERIFICANDO' : 'SEGURO' },
+        pingText() {
+          if (this.status === 'on' && this.ping !== null) return `${this.ping}ms`;
+          if (this.status === 'checking') {
+            return this.checkingStep === 0 ? '-- ms' : 'Otimizando...';
+          }
+          return '-- ms';
+        },
+        perfText() {
+          if (this.status === 'on') {
+            if (this.ping < 40) return 'ESTÁVEL';
+            if (this.ping < 80) return 'VARIÁVEL';
+            return 'ALTA LATÊNCIA';
+          }
+          return 'OCIOSO';
+        },
+        optDisabled() { return this.status !== 'on'; },
+        extraDisabled() { return this.status !== 'on'; },
+      },
+      mounted() {
+        window.addEventListener('click', (e) => {
+          const isFab = e.target.closest('.fab'), isDrop = e.target.closest('.dropdown');
+          if (!isFab && !isDrop) this.menuOpen = false;
+        });
+      },
+      methods: {
+        openTools() { this.view = 'tools'; },
+        openInfo(key) { this.activeInfo = key; },
+        openInstallHelp() { this.menuOpen = false; this.showInstallHelp = true; },
+        openHowTo() { this.menuOpen = false; this.showHowTo = true; },
+
+        handleCenterClick() {
+          if (this.status === 'off') {
+            // inicia verificação
+            this.status = 'checking';
+            this.checkingStep = 0;
+
+            clearTimeout(this._stepTimer1);
+            clearTimeout(this._stepTimer2);
+
+            // depois de 2s troca para "Otimizando..."
+            this._stepTimer1 = setTimeout(() => { this.checkingStep = 1; }, 2000);
+
+            // depois de mais ~1.3s liga o sistema
+            this._stepTimer2 = setTimeout(() => { this.setOn(); }, 3300);
+          } else if (this.status === 'on') {
+            this.setOff();
+          }
+        },
+
+        setOn() {
+          this.status = 'on';
+          this.ping = 23;               // valor fixo e verde
+          this.checkingStep = 0;
+        },
+        setOff() {
+          this.status = 'off';
+          this.ping = null;
+          this.checkingStep = 0;
+          clearTimeout(this._stepTimer1);
+          clearTimeout(this._stepTimer2);
+
+          // Desliga opções dependentes do ON
+          Object.keys(this.opt).forEach(k => this.opt[k] = false);
+          Object.keys(this.extra).forEach(k => this.extra[k] = false);
+        },
+
+        logout() { alert('Exemplo: aqui você limparia tokens e redirecionaria para /login'); this.menuOpen = false; },
+
+        // Ações da aba 3
+        toggleCache(e) {
+          if (this.status !== 'on') { e.target.checked = false; return; }
+          if (e.target.checked) {
+            const mb = (Math.random() * 400 + 50).toFixed(2);
+            this.opt.limparCache = true;
+            this.showToast(`${mb}MB de cache limpo!`);
+            setTimeout(() => {
+              this.opt.limparCache = false;
+              e.target.checked = false;
+            }, 1500);
+          } else {
+            this.opt.limparCache = false;
+          }
+        },
+
+        // IA
+        runIA() {
+          if (this.status !== 'on') return;
+          this.iaOverlay = true;
+          this.iaStepText = 'Cruzando dados com pro-players...';
+          setTimeout(() => {
+            this.iaStepText = 'Calibrando DPI virtual e resposta de toque...';
+            setTimeout(() => {
+              this.iaStepText = 'Analisando hardware do dispositivo...';
+              setTimeout(() => {
+                this.iaOverlay = false;
+                this.showToast('IA ZIMO concluída! Configuração aplicada.', 'tr');
+              }, 1200);
+            }, 1200);
+          }, 1200);
+        },
+
+        showToast(msg, pos = 'center') {
+          this.toast.text = msg;
+          this.toast.pos = pos;
+          this.toast.show = true;
+          clearTimeout(this._toastTimer);
+          this._toastTimer = setTimeout(() => { this.toast.show = false; }, 1800);
+        },
+      }
+    }).mount('#app');
+  </script>
+
+</body>
+
+</html>
